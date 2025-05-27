@@ -2,6 +2,8 @@ const express = require('express')
 const { body } = require('express-validator')
 const AuthCtrl = require('../controllers/authCtrl')
 const authMid = require('../middlewares/authMid')
+const { requireAdmin, requireUser, rateLimitByRole } = require('../middlewares/roleMid')
+const { authValidators } = require('../middlewares/validators')
 
 const AuthRout = express.Router()
 

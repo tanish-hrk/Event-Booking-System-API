@@ -1,8 +1,9 @@
 const express = require('express');
-const { body, query, param } = require('express-validator');
-const eventCtrl = require('../controllers/eventCtrl');
-const auth = require('../middlewares/authMid');
-const role = require('../middlewares/roleMid');
+const router = express.Router();
+const { authenticateToken } = require('../middlewares/authMid');
+const { requireAdmin, requireUser, canModifyEvent, rateLimitByRole } = require('../middlewares/roleMid');
+const { eventValidators } = require('../middlewares/validators');
+const EventCtrl = require('../controllers/eventCtrl');
 
 const EventRout = express.Router();
 

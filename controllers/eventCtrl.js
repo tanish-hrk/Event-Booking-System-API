@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
-const { Event, User, Booking } = require("../models");
+const { Event, User, Booking, sequelize } = require("../models");
+const { Op } = require('sequelize');
 
 class EventCtrl {
   static async addEvent(req, res) {

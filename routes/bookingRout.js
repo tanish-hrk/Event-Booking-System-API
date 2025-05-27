@@ -3,6 +3,9 @@ const { body, query, param } = require('express-validator');
 const BookingController = require('../controllers/bookingCtrl');
 const auth = require('../middlewares/authMid');
 const role = require('../middlewares/roleMid');
+const { authenticateToken } = require('../middlewares/authMid');
+const { requireUser, requireAdmin, requireOwnerOrAdmin, rateLimitByRole } = require('../middlewares/roleMid');
+const { bookingValidators } = require('../middlewares/validators');
 
 const BookingRout = express.Router();
 
