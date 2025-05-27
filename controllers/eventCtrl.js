@@ -376,6 +376,113 @@ class EventCtrl {
       data: { stats },
     });
   }
+
+  static async list(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        category,
+        status,
+        upcoming,
+        available,
+        search,
+        minPrice,
+        maxPrice,
+        startDate,
+        endDate,
+        sortBy = 'eventDate',
+        sortOrder = 'ASC'
+      } = req.query;
+
+      const offset = (page - 1) * limit;
+      const where = {};
+
+      if (category) {
+        where.category = category;
+      }
+
+      if (status) {
+        where.status = status;
+      }
+
+      if (upcoming === 'true') {
+        where.eventDate = {
+          [Op.gt]: new Date()
+        };
+      }
+
+      if (available === 'true') {
+        where.availableSeats = {
+          [Op.gt]: 0
+        };
+      }
+
+      if (minPrice || maxPrice) {
+        where.ticketPrice = {};
+        if (minPrice) where.ticketPrice[Op.gte] = parseFloat(minPrice);
+        if (maxPrice) where.ticketPrice[Op.lte] = parseFloat(maxPrice);
+      }
+
+      if (startDate || endDate) {
+        where.eventDate = {};
+        if (startDate) where.eventDate[Op.gte] = new Date(startDate);
+        if (endDate) where.eventDate[Op.lte] = new Date(endDate);
+      }
+
+      if (search) {
+        where[Op.or] = [
+          { title: { [Op.iLike]: `%${search}%` } },
+          { description: { [Op.iLike]: `%${search}%` } },
+          { venue: { [Op.iLike]: `%${search}%` } }
+        ];
+      }
+
+      const allowedSortFields = ['eventDate', 'ticketPrice', 'createdAt', 'title'];
+      const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'eventDate';
+      const order = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+      const { count, rows: events } = await Event.findAndCountAll({
+        where,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [[sortField, order]],
+        include: [
+          {
+            model: User,
+            as: 'creator',
+            attributes: ['id', 'firstName', 'lastName', 'email']
+          }
+        ]
+      });
+
+      const totalPages = Math.ceil(count / limit);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
+
+      res.status(200).json({
+        success: true,
+        data: {
+          events,
+          pagination: {
+            total: count,
+            totalPages,
+            currentPage: parseInt(page),
+            limit: parseInt(limit),
+            hasNextPage,
+            hasPrevPage
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Error in list events:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching events',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = EventCtrl;
