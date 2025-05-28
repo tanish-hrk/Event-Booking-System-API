@@ -253,9 +253,3 @@ volumes:
   mysql_data:
 ```
 
-## 🧪 Testing
-
-Run the test suite:
-```bash
-npm test
-```
