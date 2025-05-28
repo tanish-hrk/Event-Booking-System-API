@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { validationResult } = require('express-validator')
 const { User } = require('../models')
@@ -165,6 +165,89 @@ class AuthCtrl {
         token:newTok,
         tokenType:'Bearer'
       }
+    })
+  }
+
+  static async updateProfile(req, res) {
+    const errs = validationResult(req)
+    if (!errs.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errs.array()
+      })
+    }
+
+    const uid = req.user.userId
+    const updates = req.body
+
+    const user = await User.findByPk(uid)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+
+    if (updates.email && updates.email !== user.email) {
+      const existing = await User.findOne({ where: { email: updates.email.toLowerCase() } })
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: 'Email already in use'
+        })
+      }
+    }
+
+    await user.update(updates)
+
+    const updatedUser = await User.findByPk(uid, {
+      attributes: { exclude: ['password'] }
+    })
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: { user: updatedUser }
+    })
+  }
+
+  static async changePassword(req, res) {
+    const errs = validationResult(req)
+    if (!errs.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errs.array()
+      })
+    }
+
+    const uid = req.user.userId
+    const { currentPassword, newPassword } = req.body
+
+    const user = await User.findByPk(uid)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+
+    const validPwd = await bcrypt.compare(currentPassword, user.password)
+    if (!validPwd) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      })
+    }
+
+    const rounds = 12
+    const pwdHash = await bcrypt.hash(newPassword, rounds)
+    await user.update({ password: pwdHash })
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully'
     })
   }
 }

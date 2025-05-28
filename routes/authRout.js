@@ -40,8 +40,7 @@ AuthRout.post('/register', [
     .optional()
     .isIn(['user', 'admin'])
     .withMessage('Invalid role')
-], AuthCtrl.register)
-
+], AuthCtrl.signup)
 
 AuthRout.post('/login', [
   body('email')
@@ -55,11 +54,9 @@ AuthRout.post('/login', [
     .withMessage('Password required')
     .isLength({ min: 1 })
     .withMessage('Password too short')
-], AuthCtrl.login)
+], AuthCtrl.signin)
 
-
-AuthRout.get('/profile', authMid, AuthCtrl.getProfile)
-
+AuthRout.get('/profile', authMid, AuthCtrl.profile)
 
 AuthRout.put('/profile', [
   authMid,
@@ -87,7 +84,6 @@ AuthRout.put('/profile', [
     .normalizeEmail()
 ], AuthCtrl.updateProfile)
 
-
 AuthRout.post('/change-password', [
   authMid,
   body('currentPassword')
@@ -109,9 +105,7 @@ AuthRout.post('/change-password', [
     })
 ], AuthCtrl.changePassword)
 
-
 AuthRout.post('/logout', authMid, AuthCtrl.logout)
-
 
 AuthRout.get('/verify-token', authMid, (req, res) => {
   res.status(200).json({
@@ -124,6 +118,5 @@ AuthRout.get('/verify-token', authMid, (req, res) => {
     }
   })
 })
-
 
 module.exports = AuthRout
