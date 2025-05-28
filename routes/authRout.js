@@ -56,10 +56,10 @@ AuthRout.post('/login', [
     .withMessage('Password too short')
 ], AuthCtrl.signin)
 
-AuthRout.get('/profile', authMid, AuthCtrl.profile)
+AuthRout.get('/profile', authMid.authenticateToken, AuthCtrl.profile)
 
 AuthRout.put('/profile', [
-  authMid,
+  authMid.authenticateToken,
   body('firstName')
     .optional()
     .trim()
@@ -85,7 +85,7 @@ AuthRout.put('/profile', [
 ], AuthCtrl.updateProfile)
 
 AuthRout.post('/change-password', [
-  authMid,
+  authMid.authenticateToken,
   body('currentPassword')
     .notEmpty()
     .withMessage('Current password needed'),
@@ -105,9 +105,9 @@ AuthRout.post('/change-password', [
     })
 ], AuthCtrl.changePassword)
 
-AuthRout.post('/logout', authMid, AuthCtrl.logout)
+AuthRout.post('/logout', authMid.authenticateToken, AuthCtrl.logout)
 
-AuthRout.get('/verify-token', authMid, (req, res) => {
+AuthRout.get('/verify-token', authMid.authenticateToken, (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Token OK',

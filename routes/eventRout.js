@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middlewares/authMid');
 const { requireAdmin, requireUser, canModifyEvent, rateLimitByRole } = require('../middlewares/roleMid');
 const { eventValidators } = require('../middlewares/validators');
 const EventCtrl = require('../controllers/eventCtrl');
+const { body, param, query } = require('express-validator');
 
 const EventRout = express.Router();
 
@@ -15,20 +16,20 @@ EventRout.get('/', [
   query('upcoming').optional().isBoolean(),
   query('available').optional().isBoolean(),
   query('search').optional().trim().isLength({ min: 2, max: 100 })
-], eventCtrl.getAllEvents);
+], EventCtrl.getAllEvents);
 
 EventRout.get('/upcoming', [
   query('limit').optional().isInt({ min: 1, max: 50 })
-], eventCtrl.getUpcomingEvents);
+], EventCtrl.getUpcomingEvents);
 
 EventRout.get('/search', [
   query('q').trim().isLength({ min: 2, max: 100 }),
   query('category').optional().isIn(['conference','workshop','seminar','concert','sports','other'])
-], eventCtrl.searchEvents);
+], EventCtrl.searchEvents);
 
 EventRout.get('/:eventId', [
   param('eventId').isUUID()
-], eventCtrl.getEventById);
+], EventCtrl.getEventById);
 
 EventRout.post('/', [
   auth,
@@ -47,7 +48,7 @@ EventRout.post('/', [
   }),
   body('category').isIn(['conference','workshop','seminar','concert','sports','other']),
   body('imageUrl').optional().isURL().isLength({ max: 500 })
-], eventCtrl.createEvent);
+], EventCtrl.createEvent);
 
 EventRout.put('/:eventId', [
   auth,
@@ -65,13 +66,13 @@ EventRout.put('/:eventId', [
   body('category').optional().isIn(['conference','workshop','seminar','concert','sports','other']),
   body('status').optional().isIn(['active','cancelled','completed']),
   body('imageUrl').optional().isURL().isLength({ max: 500 })
-], eventCtrl.updateEvent);
+], EventCtrl.updateEvent);
 
 EventRout.delete('/:eventId', [
   auth,
   role(['admin']),
   param('eventId').isUUID()
-], eventCtrl.deleteEvent);
+], EventCtrl.deleteEvent);
 
 EventRout.get('/:eventId/bookings', [
   auth,
@@ -80,12 +81,12 @@ EventRout.get('/:eventId/bookings', [
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
   query('status').optional().isIn(['pending','confirmed','cancelled','refunded'])
-], eventCtrl.getEventBookings);
+], EventCtrl.getEventBookings);
 
 EventRout.get('/:eventId/stats', [
   auth,
   role(['admin']),
   param('eventId').isUUID()
-], eventCtrl.getEventStats);
+], EventCtrl.getEventStats);
 
 module.exports = EventRout;
