@@ -117,13 +117,6 @@ The API documentation is available through Swagger UI at:
 http://localhost:3000/api-docs
 ```
 
-The Swagger documentation includes:
-- Detailed endpoint descriptions
-- Request/response schemas
-- Authentication requirements
-- Example requests and responses
-- Available query parameters and filters
-
 ### Authentication Endpoints
 
 - `POST /api/auth/register` - Register a new user
@@ -154,15 +147,15 @@ The Swagger documentation includes:
 
 ### Admin
 - Full access to all endpoints
-- Can manage all events
-- Can view all bookings
-- Can manage user roles
+- manage all events
+- view all bookings
+- manage user roles
 
 ### User
-- Can view events
-- Can make bookings
-- Can manage own profile
-- Can view own bookings
+- view events
+- make bookings
+- manage own profile
+- view own bookings
 
 ## 📝 API Request Examples
 
